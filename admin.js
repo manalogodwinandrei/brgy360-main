@@ -1,3 +1,5 @@
+import './admin.css';
+
 /**
  * Brgy360 - Admin Analytics & Governance Console
  * Barangay Pallocan West, Batangas City
@@ -1263,6 +1265,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0917 554 8219',
       dob: '1995-04-18',
       age: 31,
+      gender: 'Female',
       civilStatus: 'Single',
       address: '082 Purok 2 Embankment Road, Barangay Pallocan West, Batangas City',
       sitio: 'Purok 2 Embankment',
@@ -1287,6 +1290,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0920 891 2345',
       dob: '1988-11-04',
       age: 37,
+      gender: 'Male',
       civilStatus: 'Married',
       address: 'Block 14 Lot 6, Tierra Verde Subd., Barangay Pallocan West, Batangas City',
       sitio: 'Tierra Verde & Potenciana',
@@ -1311,6 +1315,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0998 712 3490',
       dob: '1992-08-30',
       age: 34,
+      gender: 'Female',
       civilStatus: 'Married',
       address: '019 Sitio Santolan Interior, Barangay Pallocan West, Batangas City',
       sitio: 'Sitio Santolan',
@@ -1335,6 +1340,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0927 348 9120',
       dob: '2001-02-14',
       age: 25,
+      gender: 'Male',
       civilStatus: 'Single',
       address: '105 Crossing Ilaya Road, Barangay Pallocan West, Batangas City',
       sitio: 'Sitio Ilaya',
@@ -1359,6 +1365,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0917 123 4567',
       dob: '1992-06-15',
       age: 34,
+      gender: 'Male',
       civilStatus: 'Married',
       address: '042 Sitio Ibaba Main Road, Barangay Pallocan West, Batangas City',
       sitio: 'Sitio Ibaba',
@@ -1383,6 +1390,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0918 345 6789',
       dob: '1998-03-21',
       age: 28,
+      gender: 'Female',
       civilStatus: 'Single',
       address: 'Block 3 Lot 8, Villa Celina, Barangay Pallocan West, Batangas City',
       sitio: 'Sitio Santolan',
@@ -1407,6 +1415,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0922 456 7890',
       dob: '1981-12-09',
       age: 45,
+      gender: 'Male',
       civilStatus: 'Married',
       address: '088 Crossing Ilaya, Barangay Pallocan West, Batangas City',
       sitio: 'Sitio Ilaya',
@@ -1431,6 +1440,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: '0915 678 1234',
       dob: '1999-09-17',
       age: 27,
+      gender: 'Male',
       civilStatus: 'Single',
       address: '24 Commercial Arcade, G.C. Berberabe, Barangay Pallocan West, Batangas City',
       sitio: 'G.C. Berberabe',
@@ -5066,6 +5076,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     currentReviewingResId = appId;
 
+    // Helper: Split name handling suffixes (Jr., Sr., II, III, etc.)
+    function parseNameWithSuffix(fullName) {
+      const suffixes = ['JR.', 'JR', 'SR.', 'SR', 'II', 'III', 'IV', 'V'];
+      const clean = (fullName || '').trim();
+      const parts = clean.split(/\s+/);
+      if (parts.length <= 1) {
+        return { lastName: clean.toUpperCase(), givenName: clean.toUpperCase() };
+      }
+      let suffix = '';
+      if (parts.length > 2 && suffixes.includes(parts[parts.length - 1].toUpperCase())) {
+        suffix = parts.pop().toUpperCase();
+      }
+      const lastName = parts.pop().toUpperCase() + (suffix ? ' ' + suffix : '');
+      const givenName = parts.join(' ').toUpperCase();
+      return { lastName, givenName };
+    }
+
+    const gender = app.gender || (app.fullName.toLowerCase().includes('clarisse') || app.fullName.toLowerCase().includes('maria') || app.fullName.toLowerCase().includes('rhea') || app.fullName.toLowerCase().includes('lourdes') || app.fullName.toLowerCase().includes('carmela') ? 'Female' : 'Male');
+
     // Header & Meta
     const modalSub = document.getElementById('resReviewModalSub');
     if (modalSub) {
@@ -5093,6 +5122,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const dDob = document.getElementById('resReviewDetailDob');
     if (dDob) dDob.textContent = formatDobAndAge(app.dob, app.age);
+
+    const dGender = document.getElementById('resReviewDetailGender');
+    if (dGender) dGender.textContent = gender;
 
     const dCivil = document.getElementById('resReviewDetailCivil');
     if (dCivil) dCivil.textContent = app.civilStatus || 'Single';
@@ -5134,24 +5166,40 @@ document.addEventListener('DOMContentLoaded', function () {
     if (proofTypeTag) proofTypeTag.textContent = app.proofType || 'PrimeWater Utility Bill';
 
     // Populate Dynamic Graphic Text in Document 1: Government ID
-    const nameParts = (app.fullName || '').trim().split(/\s+/);
-    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1].toUpperCase() : app.fullName.toUpperCase();
-    const givenName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ').toUpperCase() : app.fullName.toUpperCase();
+    const nameInfo = parseNameWithSuffix(app.fullName);
 
     const gLastName = document.getElementById('resGraphicLastName');
-    if (gLastName) gLastName.textContent = lastName;
+    if (gLastName) gLastName.textContent = nameInfo.lastName;
 
     const gGivenName = document.getElementById('resGraphicGivenName');
-    if (gGivenName) gGivenName.textContent = givenName;
+    if (gGivenName) gGivenName.textContent = nameInfo.givenName;
 
     const gDob = document.getElementById('resGraphicDob');
     if (gDob) gDob.textContent = app.dob || '1995/04/18';
+
+    const gSex = document.getElementById('resGraphicSex');
+    if (gSex) gSex.textContent = gender.toUpperCase();
 
     const gAddress = document.getElementById('resGraphicAddress');
     if (gAddress) gAddress.textContent = (app.address || 'Pallocan West, Batangas City').toUpperCase();
 
     const gCardNo = document.getElementById('resGraphicCardNo');
     if (gCardNo) gCardNo.textContent = `${app.idType.split(' ')[0]} Card No: ${app.idNumber || '4829-9182-3918-0912'}`;
+
+    const gDocTitle = document.getElementById('resGraphicIdTitle');
+    if (gDocTitle) {
+      if (app.idType.includes('Driver')) {
+        gDocTitle.textContent = "DRIVER'S LICENSE (LTO)";
+      } else if (app.idType.includes('PhilID') || app.idType.includes('National')) {
+        gDocTitle.textContent = "PAMBANSANG PAGKAKAKILANLAN";
+      } else if (app.idType.includes('UMID') || app.idType.includes('SSS')) {
+        gDocTitle.textContent = "UNIFIED MULTI-PURPOSE ID";
+      } else if (app.idType.includes('Voter')) {
+        gDocTitle.textContent = "COMELEC VOTER'S ID";
+      } else {
+        gDocTitle.textContent = app.idType.toUpperCase();
+      }
+    }
 
     // Populate Dynamic Graphic Text in Document 2: Proof of Residency
     const gProofIssuer = document.getElementById('resGraphicProofIssuer');
@@ -5165,6 +5213,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const gProofAddress = document.getElementById('resGraphicProofAddress');
     if (gProofAddress) gProofAddress.textContent = app.address;
+
+    const gProofPeriod = document.getElementById('resGraphicProofPeriod');
+    if (gProofPeriod) gProofPeriod.textContent = 'Sep 15, 2026 – Oct 14, 2026';
 
     // Workflow Action Controls Configuration
     const auditStatus = document.getElementById('resReviewAuditStatus');
