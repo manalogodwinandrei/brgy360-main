@@ -83,13 +83,30 @@
       const storedUsers = JSON.parse(localStorage.getItem('brgy360_residents_db') || '[]');
       const found = storedUsers.find(u => u.email.toLowerCase() === cleanEmail && u.password === cleanPass);
       if (found) {
+        // Enforce admin verification prerequisite
+        if (found.status === 'Pending' || found.verified === false) {
+          return {
+            success: false,
+            status: 'Pending',
+            message: 'Your registration is currently pending admin verification. An administrator must verify your submitted ID and documents before your account is activated.'
+          };
+        }
+        if (found.status === 'Rejected') {
+          return {
+            success: false,
+            status: 'Rejected',
+            message: 'Your account registration was declined by the administrator: ' + (found.rejectionReason || 'Document verification could not be completed.')
+          };
+        }
+
         localStorage.setItem('currentUserRole', 'resident');
         localStorage.setItem('brgy360_session', JSON.stringify({
           role: 'resident',
           email: found.email,
-          name: found.fullName || 'Resident User',
+          name: found.fullName || found.name || 'Resident User',
           loginTime: new Date().toISOString()
         }));
+        localStorage.setItem('brgy360_user', JSON.stringify(found));
         return { success: true, role: 'resident', redirect: 'user.html', user: found };
       }
     } catch (e) {

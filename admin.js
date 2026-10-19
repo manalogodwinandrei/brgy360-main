@@ -5163,59 +5163,136 @@ document.addEventListener('DOMContentLoaded', function () {
     if (idTypeTag) idTypeTag.textContent = app.idType || 'Philippine National ID (PhilID)';
 
     const proofTypeTag = document.getElementById('resReviewProofTypeTag');
-    if (proofTypeTag) proofTypeTag.textContent = app.proofType || 'PrimeWater Utility Bill';
+    if (proofTypeTag) {
+      proofTypeTag.textContent = app.proofType && !app.proofType.includes('None')
+        ? app.proofType
+        : 'Optional Proof (Not Attached)';
+    }
 
-    // Populate Dynamic Graphic Text in Document 1: Government ID
+    // Populate Dynamic Graphic Text / Image in Document 1: Government ID
     const nameInfo = parseNameWithSuffix(app.fullName);
-
-    const gLastName = document.getElementById('resGraphicLastName');
-    if (gLastName) gLastName.textContent = nameInfo.lastName;
-
-    const gGivenName = document.getElementById('resGraphicGivenName');
-    if (gGivenName) gGivenName.textContent = nameInfo.givenName;
-
-    const gDob = document.getElementById('resGraphicDob');
-    if (gDob) gDob.textContent = app.dob || '1995/04/18';
-
-    const gSex = document.getElementById('resGraphicSex');
-    if (gSex) gSex.textContent = gender.toUpperCase();
-
-    const gAddress = document.getElementById('resGraphicAddress');
-    if (gAddress) gAddress.textContent = (app.address || 'Pallocan West, Batangas City').toUpperCase();
-
-    const gCardNo = document.getElementById('resGraphicCardNo');
-    if (gCardNo) gCardNo.textContent = `${app.idType.split(' ')[0]} Card No: ${app.idNumber || '4829-9182-3918-0912'}`;
-
-    const gDocTitle = document.getElementById('resGraphicIdTitle');
-    if (gDocTitle) {
-      if (app.idType.includes('Driver')) {
-        gDocTitle.textContent = "DRIVER'S LICENSE (LTO)";
-      } else if (app.idType.includes('PhilID') || app.idType.includes('National')) {
-        gDocTitle.textContent = "PAMBANSANG PAGKAKAKILANLAN";
-      } else if (app.idType.includes('UMID') || app.idType.includes('SSS')) {
-        gDocTitle.textContent = "UNIFIED MULTI-PURPOSE ID";
-      } else if (app.idType.includes('Voter')) {
-        gDocTitle.textContent = "COMELEC VOTER'S ID";
+    const idPreviewBox = document.getElementById('resReviewIdPreviewBox');
+    
+    if (idPreviewBox) {
+      if (app.idAttachmentData) {
+        idPreviewBox.innerHTML = `
+          <div class="res-uploaded-id-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; background: #0f172a; border-radius: 8px; width: 100%;">
+            <img src="${app.idAttachmentData}" alt="Submitted Government ID" style="max-height: 190px; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+            <div style="margin-top: 10px; font-size: 11.5px; color: #94a3b8; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <span style="font-weight: 600; color: #f8fafc;">📎 ${escapeHtml(app.idAttachmentName || 'Government ID Attachment')}</span>
+              <span style="background: rgba(255,255,255,0.12); padding: 2px 8px; border-radius: 4px; font-size: 10.5px; color: #38bdf8;">Submitted ID File</span>
+            </div>
+          </div>
+        `;
       } else {
-        gDocTitle.textContent = app.idType.toUpperCase();
+        idPreviewBox.innerHTML = `
+          <div class="res-id-graphic">
+            <div class="res-id-graphic-header">
+              <div>
+                <div class="res-id-rep-title">Republika ng Pilipinas</div>
+                <div class="res-id-doc-title" id="resGraphicIdTitle">${escapeHtml(app.idType.toUpperCase())}</div>
+              </div>
+              <div class="res-id-flag">🇵🇭</div>
+            </div>
+            <div class="res-id-graphic-body">
+              <div class="res-id-photo-box" id="resGraphicPhotoBox">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>PHOTO ID</span>
+              </div>
+              <div class="res-id-fields-grid">
+                <div class="res-id-field">
+                  <span class="res-id-lbl">Apelyido / Last Name</span>
+                  <strong class="res-id-val" id="resGraphicLastName">${escapeHtml(nameInfo.lastName)}</strong>
+                </div>
+                <div class="res-id-field">
+                  <span class="res-id-lbl">Mga Pangalan / Given Names</span>
+                  <strong class="res-id-val" id="resGraphicGivenName">${escapeHtml(nameInfo.givenName)}</strong>
+                </div>
+                <div class="res-id-field-inline">
+                  <div>
+                    <span class="res-id-lbl">Kapanganakan / DOB</span>
+                    <span class="res-id-val" id="resGraphicDob">${escapeHtml(app.dob || '1995/04/18')}</span>
+                  </div>
+                  <div>
+                    <span class="res-id-lbl">Kasarian / Sex</span>
+                    <span class="res-id-val" id="resGraphicSex">${escapeHtml(gender.toUpperCase())}</span>
+                  </div>
+                </div>
+                <div class="res-id-field">
+                  <span class="res-id-lbl">Tirahan / Address</span>
+                  <span class="res-id-val" id="resGraphicAddress">${escapeHtml((app.address || 'Pallocan West, Batangas City').toUpperCase())}</span>
+                </div>
+              </div>
+            </div>
+            <div class="res-id-barcode-row">
+              <span id="resGraphicCardNo">${escapeHtml(app.idType.split(' ')[0])} Card No: ${escapeHtml(app.idNumber || '4829-9182-3918-0912')}</span>
+              <span class="res-id-barcode-bars">||||||| | ||||| || |||| |||</span>
+            </div>
+          </div>
+        `;
       }
     }
 
     // Populate Dynamic Graphic Text in Document 2: Proof of Residency
-    const gProofIssuer = document.getElementById('resGraphicProofIssuer');
-    if (gProofIssuer) gProofIssuer.textContent = app.proofIssuer || 'PrimeWater Batangas City';
+    const proofPreviewBox = document.getElementById('resReviewProofPreviewBox');
+    if (proofPreviewBox) {
+      if (app.proofAttachmentData) {
+        proofPreviewBox.innerHTML = `
+          <div class="res-uploaded-proof-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%;">
+            <img src="${app.proofAttachmentData}" alt="Uploaded Proof of Residency" style="max-height: 190px; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="margin-top: 10px; font-size: 11.5px; color: #475569; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <span style="font-weight: 600; color: #0f172a;">📎 ${escapeHtml(app.proofAttachmentName || 'Proof of Residency Attachment')}</span>
+              <span style="background: #e0f2fe; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; color: #0369a1; font-weight: 600;">${escapeHtml(app.proofType || 'Proof Document')}</span>
+            </div>
+          </div>
+        `;
+      } else if (!app.proofType || app.proofType.includes('None') || app.proofType.includes('Not Provided')) {
+        proofPreviewBox.innerHTML = `
+          <div style="padding: 24px 18px; text-align: center; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#94a3b8" stroke-width="1.8" style="margin-bottom: 8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div style="font-weight: 600; color: #334155; font-size: 13px;">Optional Proof Document Not Attached</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">The applicant completed registration submitting Government ID only. Additional utility bill or contract is optional.</div>
+          </div>
+        `;
+      } else {
+        const issuerName = app.proofType.includes('PrimeWater') ? 'PrimeWater Batangas City' :
+          app.proofType.includes('Meralco') ? 'Meralco Batangas Sector' :
+          app.proofType.includes('Barangay') ? 'Barangay Pallocan West' :
+          app.proofType.includes('Lease') ? 'Notarized Lease Agreement' :
+          app.proofType.includes('PLDT') ? 'PLDT / Telecom Billing' : (app.proofIssuer || 'Utility Billing');
 
-    const gProofAccount = document.getElementById('resGraphicProofAccount');
-    if (gProofAccount) gProofAccount.textContent = app.proofNumber || 'PW-BAT-90281-26';
-
-    const gProofName = document.getElementById('resGraphicProofName');
-    if (gProofName) gProofName.textContent = app.fullName.toUpperCase();
-
-    const gProofAddress = document.getElementById('resGraphicProofAddress');
-    if (gProofAddress) gProofAddress.textContent = app.address;
-
-    const gProofPeriod = document.getElementById('resGraphicProofPeriod');
-    if (gProofPeriod) gProofPeriod.textContent = 'Sep 15, 2026 – Oct 14, 2026';
+        proofPreviewBox.innerHTML = `
+          <div class="res-proof-graphic">
+            <div class="res-proof-header">
+              <span class="res-proof-logo-text">${escapeHtml(issuerName)}</span>
+              <span class="res-proof-badge">${escapeHtml(app.proofType)}</span>
+            </div>
+            <div class="res-proof-info-grid">
+              <div class="res-proof-row">
+                <span class="res-proof-lbl">Account / Doc Number</span>
+                <strong class="res-proof-val font-mono">${escapeHtml(app.proofNumber || 'PW-BAT-90281-26')}</strong>
+              </div>
+              <div class="res-proof-row">
+                <span class="res-proof-lbl">Account Holder</span>
+                <strong class="res-proof-val">${escapeHtml(app.fullName.toUpperCase())}</strong>
+              </div>
+              <div class="res-proof-row">
+                <span class="res-proof-lbl">Service Address</span>
+                <span class="res-proof-val">${escapeHtml(app.address)}</span>
+              </div>
+              <div class="res-proof-row">
+                <span class="res-proof-lbl">Billing Status</span>
+                <span class="res-proof-val" style="color: #16a34a; font-weight: 600;">✓ Verified Address Match</span>
+              </div>
+            </div>
+            <div class="res-proof-address-match">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Residence verified in ${escapeHtml(app.sitio)}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
 
     // Workflow Action Controls Configuration
     const auditStatus = document.getElementById('resReviewAuditStatus');
@@ -5265,6 +5342,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
     saveResidentApplications();
 
+    // CRITICAL: Synchronize with brgy360_residents_db so the resident can now successfully log in!
+    try {
+      const residentsDb = JSON.parse(localStorage.getItem('brgy360_residents_db') || '[]');
+      let userUpdated = false;
+      residentsDb.forEach(u => {
+        if ((u.email && u.email.toLowerCase() === app.email.toLowerCase()) || u.residentId === app.id) {
+          u.verified = true;
+          u.status = 'Verified';
+          u.verificationTier = 'Level 2: Fully Verified Resident';
+          u.idOnRecord = `${app.idType} • Verified by Admin`;
+          if (app.gender) u.gender = app.gender;
+          if (app.civilStatus) u.civilStatus = app.civilStatus;
+          userUpdated = true;
+        }
+      });
+
+      if (!userUpdated && app.email) {
+        residentsDb.push({
+          name: app.fullName,
+          fullName: app.fullName,
+          email: app.email,
+          password: 'UserPassword360!',
+          mobile: app.mobile,
+          dob: app.dob,
+          gender: app.gender || 'Not Specified',
+          civilStatus: app.civilStatus || 'Single',
+          address: app.address,
+          sitio: app.sitio,
+          city: 'Batangas City, Batangas',
+          residentId: app.id,
+          registeredVoter: app.voterStatus || 'Yes (Precinct 0142A)',
+          verified: true,
+          status: 'Verified',
+          verificationTier: 'Level 2: Fully Verified Resident',
+          idType: app.idType,
+          idNumber: app.idNumber,
+          proofType: app.proofType,
+          avatarInitial: app.fullName ? app.fullName.charAt(0).toUpperCase() : 'R'
+        });
+      }
+      localStorage.setItem('brgy360_residents_db', JSON.stringify(residentsDb));
+
+      // Also update currently active session if user was logged in
+      const curUser = JSON.parse(localStorage.getItem('brgy360_user') || '{}');
+      if (curUser && curUser.email && curUser.email.toLowerCase() === app.email.toLowerCase()) {
+        curUser.verified = true;
+        curUser.status = 'Verified';
+        curUser.verificationTier = 'Level 2: Fully Verified Resident';
+        localStorage.setItem('brgy360_user', JSON.stringify(curUser));
+      }
+    } catch (e) {
+      console.warn('Failed to update residents db on approval:', e);
+    }
+
     // Close review modal
     const reviewModal = document.getElementById('resReviewModal');
     if (reviewModal) reviewModal.classList.remove('active');
@@ -5279,7 +5410,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const actModal = document.getElementById('resActivationNoticeModal');
     if (actModal) actModal.classList.add('active');
 
-    showAdminToast('Account Verified', `Resident ${app.fullName} is now verified. Automated activation link generated.`, 'success');
+    showAdminToast('Account Verified', `Resident ${app.fullName} is now verified and active. The resident can now log in to the resident portal.`, 'success');
 
     // Refresh views
     renderResidentVerificationTable();
@@ -5335,6 +5466,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     saveResidentApplications();
 
+    // Sync with brgy360_residents_db
+    try {
+      const residentsDb = JSON.parse(localStorage.getItem('brgy360_residents_db') || '[]');
+      residentsDb.forEach(u => {
+        if ((u.email && u.email.toLowerCase() === app.email.toLowerCase()) || u.residentId === app.id) {
+          u.verified = false;
+          u.status = 'Rejected';
+          u.rejectionReason = reasonVal;
+          u.rejectionNotes = notesVal;
+          u.verificationTier = 'Registration Declined';
+        }
+      });
+      localStorage.setItem('brgy360_residents_db', JSON.stringify(residentsDb));
+    } catch (e) {}
+
     // Close rejection & review modals
     const rejectModal = document.getElementById('resRejectModal');
     if (rejectModal) rejectModal.classList.remove('active');
@@ -5370,12 +5516,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (type === 'id') {
       if (titleEl) titleEl.textContent = 'Government Identification Preview & Inspection';
-      const source = document.querySelector('#resReviewIdPreviewBox .res-id-graphic');
-      if (source) viewport.appendChild(source.cloneNode(true));
+      const uploadedImg = document.querySelector('#resReviewIdPreviewBox img');
+      if (uploadedImg) {
+        const cloned = uploadedImg.cloneNode(true);
+        cloned.style.maxHeight = '70vh';
+        cloned.style.maxWidth = '90vw';
+        viewport.appendChild(cloned);
+      } else {
+        const source = document.querySelector('#resReviewIdPreviewBox .res-id-graphic');
+        if (source) viewport.appendChild(source.cloneNode(true));
+      }
     } else {
       if (titleEl) titleEl.textContent = 'Proof of Residency Document Inspection';
-      const source = document.querySelector('#resReviewProofPreviewBox .res-proof-graphic');
-      if (source) viewport.appendChild(source.cloneNode(true));
+      const uploadedImg = document.querySelector('#resReviewProofPreviewBox img');
+      if (uploadedImg) {
+        const cloned = uploadedImg.cloneNode(true);
+        cloned.style.maxHeight = '70vh';
+        cloned.style.maxWidth = '90vw';
+        viewport.appendChild(cloned);
+      } else {
+        const source = document.querySelector('#resReviewProofPreviewBox .res-proof-graphic') || document.querySelector('#resReviewProofPreviewBox > div');
+        if (source) viewport.appendChild(source.cloneNode(true));
+      }
     }
 
     lightbox.classList.add('active');
@@ -5442,6 +5604,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function handlePreRegistrationSubmit() {
     const fullName = document.getElementById('preRegFullName')?.value.trim();
     const dob = document.getElementById('preRegDob')?.value;
+    const gender = document.getElementById('preRegGender')?.value || 'Female';
     const civil = document.getElementById('preRegCivilStatus')?.value;
     const mobile = document.getElementById('preRegMobile')?.value.trim();
     const email = document.getElementById('preRegEmail')?.value.trim();
@@ -5470,6 +5633,7 @@ document.addEventListener('DOMContentLoaded', function () {
       mobile: mobile,
       dob: dob,
       age: 28,
+      gender: gender,
       civilStatus: civil || 'Single',
       address: address,
       sitio: sitio,

@@ -386,9 +386,10 @@ select.auth-input {
 
 /* Feedback alert banner */
 .auth-feedback-banner {
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 8px;
   font-size: 13px;
+  line-height: 1.5;
   margin-bottom: 16px;
   font-weight: 500;
 }
@@ -399,10 +400,224 @@ select.auth-input {
   border: 1px solid #bbf7d0;
 }
 
+.auth-feedback-banner.warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
 .auth-feedback-banner.error {
   background-color: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
+}
+
+.auth-required-mark {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.auth-optional-badge {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* File Upload & Dropzone Styles */
+.auth-file-dropzone {
+  border: 2px dashed #cbd5e1;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.auth-file-dropzone:hover,
+.auth-file-dropzone.dragover {
+  border-color: var(--primary-color, #0d47a1);
+  background-color: #f0f7ff;
+}
+
+.auth-file-dropzone-icon {
+  width: 28px;
+  height: 28px;
+  color: #64748b;
+  margin-bottom: 2px;
+  transition: color 0.2s ease;
+}
+
+.auth-file-dropzone:hover .auth-file-dropzone-icon {
+  color: var(--primary-color, #0d47a1);
+}
+
+.auth-file-dropzone-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.auth-file-dropzone-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.auth-file-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.auth-file-preview-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.auth-file-preview-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.auth-file-preview-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.auth-file-preview-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.auth-file-preview-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-file-preview-size {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.auth-file-remove-btn {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.auth-file-remove-btn:hover {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Post Registration Pending Modal */
+.pending-verif-card {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.pending-verif-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #d97706;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  border: 3px solid #fde68a;
+}
+
+.pending-verif-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #fde68a;
+  margin-bottom: 12px;
+}
+
+.pending-verif-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  margin: 16px 0 20px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pending-verif-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.pending-verif-summary-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.pending-verif-lbl {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pending-verif-val {
+  color: #0f172a;
+  font-weight: 600;
 }
 
 /* Responsive adjustments */

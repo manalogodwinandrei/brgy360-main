@@ -607,11 +607,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const accountFullName = document.getElementById('accountFullName');
     const accountSitio = document.getElementById('accountSitio');
     const accountDob = document.getElementById('accountDob');
+    const accountGender = document.getElementById('accountGender');
     const accountCivilStatus = document.getElementById('accountCivilStatus');
     if (accountAvatar) accountAvatar.textContent = initial;
     if (accountFullName) accountFullName.textContent = name;
     if (accountSitio) accountSitio.textContent = sitio;
     if (accountDob) accountDob.textContent = currentUser.dob || 'June 15, 1992';
+    if (accountGender) accountGender.textContent = currentUser.gender || 'Male';
     if (accountCivilStatus) accountCivilStatus.textContent = currentUser.civilStatus || 'Single';
 
     // Edit form inputs

@@ -1891,15 +1891,57 @@
 
           <!-- Full Name -->
           <div class="auth-field-group">
-            <label for="regFullName" class="auth-label">Full Name</label>
+            <label for="regFullName" class="auth-label">Full Legal Name <span class="auth-required-mark">*</span></label>
             <input type="text" id="regFullName" class="auth-input no-icon" placeholder="Juan Dela Cruz Santos" required autocomplete="name">
             <span class="auth-error-text" id="regFullNameError"></span>
+          </div>
+
+          <!-- 2-Column Row: Gender + Civil Status -->
+          <div class="auth-row-2col">
+            <div class="auth-field-group">
+              <label for="regGender" class="auth-label">Gender / Kasarian <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <select id="regGender" class="auth-input" required>
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other / Non-Binary">Other / Non-Binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+              <span class="auth-error-text" id="regGenderError"></span>
+            </div>
+
+            <div class="auth-field-group">
+              <label for="regCivilStatus" class="auth-label">Civil Status <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <select id="regCivilStatus" class="auth-input" required>
+                  <option value="" disabled selected>Select Civil Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Separated">Separated</option>
+                  <option value="Divorced">Divorced</option>
+                </select>
+              </div>
+              <span class="auth-error-text" id="regCivilStatusError"></span>
+            </div>
           </div>
 
           <!-- 2-Column Row: Mobile Number + Date of Birth -->
           <div class="auth-row-2col">
             <div class="auth-field-group">
-              <label for="regMobile" class="auth-label">Mobile Number</label>
+              <label for="regMobile" class="auth-label">Mobile Number <span class="auth-required-mark">*</span></label>
               <div class="auth-input-wrapper">
                 <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -1910,7 +1952,7 @@
             </div>
 
             <div class="auth-field-group">
-              <label for="regDob" class="auth-label">Date of Birth</label>
+              <label for="regDob" class="auth-label">Date of Birth <span class="auth-required-mark">*</span></label>
               <div class="auth-input-wrapper">
                 <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -1926,7 +1968,7 @@
 
           <!-- Email Address -->
           <div class="auth-field-group">
-            <label for="regEmail" class="auth-label">Email Address</label>
+            <label for="regEmail" class="auth-label">Email Address <span class="auth-required-mark">*</span></label>
             <div class="auth-input-wrapper">
               <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -1939,20 +1981,20 @@
 
           <!-- Address -->
           <div class="auth-field-group">
-            <label for="regAddress" class="auth-label">Address</label>
+            <label for="regAddress" class="auth-label">Address (House No. / Street) <span class="auth-required-mark">*</span></label>
             <div class="auth-input-wrapper">
               <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              <input type="text" id="regAddress" class="auth-input" placeholder="House No., Street" required autocomplete="street-address">
+              <input type="text" id="regAddress" class="auth-input" placeholder="House No., Street Name" required autocomplete="street-address">
             </div>
             <span class="auth-error-text" id="regAddressError"></span>
           </div>
 
           <!-- Sitio / Purok -->
           <div class="auth-field-group">
-            <label for="regSitio" class="auth-label">Sitio / Purok</label>
+            <label for="regSitio" class="auth-label">Sitio / Purok <span class="auth-required-mark">*</span></label>
             <select id="regSitio" class="auth-input no-icon" required>
               <option value="" disabled selected>Select Sitio / Purok</option>
               <option value="Sitio Ibaba">Sitio Ibaba</option>
@@ -1966,10 +2008,123 @@
             <span class="auth-error-text" id="regSitioError"></span>
           </div>
 
+          <!-- Submit ID (Picture / Attachment) Field -->
+          <div class="auth-field-group">
+            <div class="auth-label-row">
+              <label for="regIdType" class="auth-label">Submit ID (Picture / Attachment) <span class="auth-required-mark">*</span></label>
+            </div>
+            <div class="auth-input-wrapper" style="margin-bottom: 8px;">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <circle cx="9" cy="10" r="2"></circle>
+                <line x1="15" y1="8" x2="17" y2="8"></line>
+                <line x1="15" y1="12" x2="17" y2="12"></line>
+                <line x1="7" y1="16" x2="17" y2="16"></line>
+              </svg>
+              <select id="regIdType" class="auth-input" required>
+                <option value="Philippine National ID (PhilID)" selected>Philippine National ID (PhilID)</option>
+                <option value="Driver's License">Driver's License (LTO)</option>
+                <option value="COMELEC Voter's ID / Cert">COMELEC Voter's ID / Certification</option>
+                <option value="UMID / SSS ID">UMID / SSS ID</option>
+                <option value="Postal ID">Postal ID</option>
+                <option value="Philippine Passport">Philippine Passport</option>
+                <option value="Senior Citizen ID">Senior Citizen ID</option>
+                <option value="Student / School ID">Student / School ID</option>
+                <option value="PRC Professional ID">PRC Professional ID</option>
+                <option value="Barangay Resident ID">Barangay Resident ID</option>
+              </select>
+            </div>
+
+            <!-- ID Upload Dropzone -->
+            <input type="file" id="regIdFile" accept="image/jpeg,image/png,image/webp,application/pdf" style="display: none;">
+            <div class="auth-file-dropzone" id="regIdDropzone" tabindex="0" role="button" aria-label="Upload Government ID picture or attachment">
+              <svg class="auth-file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span class="auth-file-dropzone-title">Upload Valid ID Photo or Document Attachment <span class="auth-required-mark">*</span></span>
+              <span class="auth-file-dropzone-sub">Click to browse or drag &amp; drop (PNG, JPG, WEBP, or PDF max 10MB)</span>
+            </div>
+            
+            <!-- ID File Preview Container (hidden until file selected) -->
+            <div id="regIdPreviewCard" class="auth-file-preview-card" style="display: none;">
+              <div class="auth-file-preview-left">
+                <img id="regIdPreviewThumb" class="auth-file-preview-thumb" src="" alt="ID Preview" style="display: none;">
+                <div id="regIdPreviewIcon" class="auth-file-preview-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="auth-file-preview-meta">
+                  <span id="regIdFileName" class="auth-file-preview-name">id-document.jpg</span>
+                  <span id="regIdFileSize" class="auth-file-preview-size">0 KB</span>
+                </div>
+              </div>
+              <button type="button" id="btnRemoveRegIdFile" class="auth-file-remove-btn" title="Remove attached file">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Remove</span>
+              </button>
+            </div>
+            <span class="auth-error-text" id="regIdFileError"></span>
+          </div>
+
+          <!-- Proof of Residency Field (Optional) -->
+          <div class="auth-field-group">
+            <div class="auth-label-row">
+              <label for="regProofType" class="auth-label">Proof of Residency <span class="auth-optional-badge">(Optional)</span></label>
+            </div>
+            <div class="auth-input-wrapper" style="margin-bottom: 8px;">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <select id="regProofType" class="auth-input">
+                <option value="">-- No Proof of Residency Attached (Optional) --</option>
+                <option value="PrimeWater Utility Bill">PrimeWater Utility Bill (Last 3 mos)</option>
+                <option value="Meralco Electric Bill">Meralco Electric Bill</option>
+                <option value="Barangay Certification of Residence">Barangay Certification of Residence</option>
+                <option value="Lease Agreement Contract">Notarized Lease Agreement</option>
+                <option value="PLDT / Telecom Billing Statement">PLDT / Telecom Billing Statement</option>
+              </select>
+            </div>
+
+            <!-- Proof of Residency File Dropzone -->
+            <input type="file" id="regProofFile" accept="image/jpeg,image/png,image/webp,application/pdf" style="display: none;">
+            <div class="auth-file-dropzone" id="regProofDropzone" tabindex="0" role="button" aria-label="Upload Proof of Residency attachment (optional)">
+              <svg class="auth-file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span class="auth-file-dropzone-title">Upload Billing Statement / Lease Attachment <span class="auth-optional-badge">(Optional)</span></span>
+              <span class="auth-file-dropzone-sub">Optional: Attach copy of utility bill or lease contract (JPG, PNG, PDF)</span>
+            </div>
+
+            <!-- Proof File Preview Container (hidden until file selected) -->
+            <div id="regProofPreviewCard" class="auth-file-preview-card" style="display: none;">
+              <div class="auth-file-preview-left">
+                <img id="regProofPreviewThumb" class="auth-file-preview-thumb" src="" alt="Proof Preview" style="display: none;">
+                <div id="regProofPreviewIcon" class="auth-file-preview-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="auth-file-preview-meta">
+                  <span id="regProofFileName" class="auth-file-preview-name">proof-of-residency.pdf</span>
+                  <span id="regProofFileSize" class="auth-file-preview-size">0 KB</span>
+                </div>
+              </div>
+              <button type="button" id="btnRemoveRegProofFile" class="auth-file-remove-btn" title="Remove attached file">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Remove</span>
+              </button>
+            </div>
+            <span class="auth-error-text" id="regProofFileError"></span>
+          </div>
+
           <!-- 2-Column Row: Password + Confirm Password -->
           <div class="auth-row-2col">
             <div class="auth-field-group">
-              <label for="regPassword" class="auth-label">Password</label>
+              <label for="regPassword" class="auth-label">Password <span class="auth-required-mark">*</span></label>
               <div class="auth-input-wrapper">
                 <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -1991,7 +2146,7 @@
             </div>
 
             <div class="auth-field-group">
-              <label for="regConfirmPassword" class="auth-label">Confirm Password</label>
+              <label for="regConfirmPassword" class="auth-label">Confirm Password <span class="auth-required-mark">*</span></label>
               <div class="auth-input-wrapper">
                 <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -2014,7 +2169,7 @@
           </div>
 
           <!-- Primary Submit Button -->
-          <button type="submit" class="auth-btn-primary" id="btnRegisterSubmit">Create Account</button>
+          <button type="submit" class="auth-btn-primary" id="btnRegisterSubmit">Create Account &amp; Submit for Admin Verification</button>
         </form>
 
         <!-- Bottom Switch Link -->
@@ -2022,6 +2177,71 @@
           <span>Already have an account?</span>
           <button type="button" class="auth-switch-link" id="switchToLoginBtn">Log In</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: POST-REGISTRATION PENDING ADMIN VERIFICATION NOTICE -->
+  <div class="modal-overlay" id="regPendingModal" role="dialog" aria-modal="true" aria-labelledby="regPendingTitle">
+    <div class="auth-card-container pending-verif-card" style="max-width: 520px;">
+      <button class="modal-close" id="btnClosePendingModal" aria-label="Close dialog">&times;</button>
+      
+      <div class="pending-verif-icon-wrap" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="M12 8v4"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
+      </div>
+
+      <div class="pending-verif-badge-pill">
+        <span>⚡ Status: Pending Administrative Verification</span>
+      </div>
+
+      <h2 class="auth-heading" id="regPendingTitle" style="font-size: 22px;">Account Submitted for Verification</h2>
+      <p class="auth-subtitle" style="margin-bottom: 14px;">
+        Your resident registration was submitted successfully and is queued for verification by the Barangay Pallocan West civil administration.
+      </p>
+
+      <div class="pending-verif-summary-box">
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Applicant Name:</span>
+          <span class="pending-verif-val" id="summaryPendingName">Juan Dela Cruz</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Registered Email:</span>
+          <span class="pending-verif-val" id="summaryPendingEmail">juan@example.com</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Gender &amp; Civil Status:</span>
+          <span class="pending-verif-val" id="summaryPendingGenderCivil">Male · Single</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Submitted ID:</span>
+          <span class="pending-verif-val" id="summaryPendingIdType">Philippine National ID (PhilID)</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Proof of Residency:</span>
+          <span class="pending-verif-val" id="summaryPendingProofType">PrimeWater Utility Bill</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Account Access:</span>
+          <span class="pending-verif-val" style="color: #d97706; font-weight: 700;">Locked until Admin Approval</span>
+        </div>
+      </div>
+
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; text-align: left; font-size: 12.5px; color: #1e3a8a; margin-bottom: 20px; line-height: 1.5;">
+        <strong>Admin Verification Policy:</strong> Accounts must be verified first by an administrator before you can sign in. An admin will review your submitted ID and residency documents.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="admin.html#demographics" class="auth-btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; background: #0f172a;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+          <span>Open Admin Console to Verify Account</span>
+        </a>
+        <button type="button" class="btn-secondary" id="btnPendingToLogin" style="width: 100%; padding: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 600; cursor: pointer; color: #334155;">
+          Return to Sign In
+        </button>
       </div>
     </div>
   </div>

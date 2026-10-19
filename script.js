@@ -478,13 +478,51 @@ document.addEventListener('DOMContentLoaded', function () {
           setFieldError(loginPassword, loginPasswordError, 'Invalid resident password.');
           return;
         }
+
+        // ENFORCE ADMIN VERIFICATION REQUIREMENT:
+        // When creating account, it must be verified first by admin before successfully creating an account / logging in
+        if (customUser.status === 'Pending' || customUser.verified === false) {
+          if (loginFeedback) {
+            loginFeedback.className = 'auth-feedback-banner warning';
+            loginFeedback.innerHTML = `
+              <strong>⏳ Account Pending Admin Verification</strong><br>
+              Your resident registration for <em>${escapeHtml(customUser.email)}</em> has been recorded and is currently awaiting administrator review and approval.<br>
+              <span style="font-size: 12px; color: #78350f; display: block; margin-top: 4px;">
+                An authorized barangay official must verify your submitted government ID and documents before your account is activated.
+              </span>
+              <div style="margin-top: 8px;">
+                <a href="admin.html#demographics" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: #0d47a1; text-decoration: underline; font-size: 12.5px;">
+                  Open Admin Verification Desk to inspect &amp; approve &rarr;
+                </a>
+              </div>
+            `;
+            loginFeedback.style.display = 'block';
+          }
+          return;
+        }
+
+        if (customUser.status === 'Rejected') {
+          if (loginFeedback) {
+            loginFeedback.className = 'auth-feedback-banner error';
+            loginFeedback.innerHTML = `
+              <strong>✕ Account Application Declined</strong><br>
+              Your registration was declined during administrative verification: <em>${escapeHtml(customUser.rejectionReason || 'Requirements not met')}</em>.<br>
+              ${customUser.rejectionNotes ? `<small style="display:block; margin-top:4px;">Notes: ${escapeHtml(customUser.rejectionNotes)}</small>` : ''}
+              Please visit Barangay Pallocan West Hall or submit a new registration with valid documents.
+            `;
+            loginFeedback.style.display = 'block';
+          }
+          return;
+        }
+
+        // If verified by admin, allow resident portal access
         localStorage.setItem('currentUserRole', 'resident');
         localStorage.setItem('brgy360_session', 'active');
         localStorage.setItem('brgy360_user', JSON.stringify(customUser));
 
         if (loginFeedback) {
           loginFeedback.className = 'auth-feedback-banner success';
-          loginFeedback.textContent = 'Welcome back! Logging you in to the resident portal...';
+          loginFeedback.textContent = `Welcome back, ${customUser.name || customUser.fullName}! Logging you in to the resident portal...`;
           loginFeedback.style.display = 'block';
         }
         setTimeout(function () {
@@ -507,25 +545,239 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 4. Client-Side Validation: Registration Form
+  // 4. Client-Side Validation & File Management: Registration Form
   const regFullName = document.getElementById('regFullName');
+  const regGender = document.getElementById('regGender');
+  const regCivilStatus = document.getElementById('regCivilStatus');
   const regMobile = document.getElementById('regMobile');
   const regDob = document.getElementById('regDob');
   const regEmail = document.getElementById('regEmail');
   const regAddress = document.getElementById('regAddress');
   const regSitio = document.getElementById('regSitio');
+  const regIdType = document.getElementById('regIdType');
+  const regProofType = document.getElementById('regProofType');
   const regPassword = document.getElementById('regPassword');
   const regConfirmPassword = document.getElementById('regConfirmPassword');
 
   const regFullNameError = document.getElementById('regFullNameError');
+  const regGenderError = document.getElementById('regGenderError');
+  const regCivilStatusError = document.getElementById('regCivilStatusError');
   const regMobileError = document.getElementById('regMobileError');
   const regDobError = document.getElementById('regDobError');
   const regEmailError = document.getElementById('regEmailError');
   const regAddressError = document.getElementById('regAddressError');
   const regSitioError = document.getElementById('regSitioError');
+  const regIdFileError = document.getElementById('regIdFileError');
+  const regProofFileError = document.getElementById('regProofFileError');
   const regPasswordError = document.getElementById('regPasswordError');
   const regConfirmPasswordError = document.getElementById('regConfirmPasswordError');
   const registerFeedback = document.getElementById('registerFeedback');
+
+  // File Upload Elements
+  const regIdFile = document.getElementById('regIdFile');
+  const regIdDropzone = document.getElementById('regIdDropzone');
+  const regIdPreviewCard = document.getElementById('regIdPreviewCard');
+  const regIdPreviewThumb = document.getElementById('regIdPreviewThumb');
+  const regIdPreviewIcon = document.getElementById('regIdPreviewIcon');
+  const regIdFileName = document.getElementById('regIdFileName');
+  const regIdFileSize = document.getElementById('regIdFileSize');
+  const btnRemoveRegIdFile = document.getElementById('btnRemoveRegIdFile');
+
+  const regProofFile = document.getElementById('regProofFile');
+  const regProofDropzone = document.getElementById('regProofDropzone');
+  const regProofPreviewCard = document.getElementById('regProofPreviewCard');
+  const regProofPreviewThumb = document.getElementById('regProofPreviewThumb');
+  const regProofPreviewIcon = document.getElementById('regProofPreviewIcon');
+  const regProofFileName = document.getElementById('regProofFileName');
+  const regProofFileSize = document.getElementById('regProofFileSize');
+  const btnRemoveRegProofFile = document.getElementById('btnRemoveRegProofFile');
+
+  // In-memory attachment records
+  let currentRegIdAttachment = null;
+  let currentRegProofAttachment = null;
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 KB';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function computeAge(dobString) {
+    if (!dobString) return 28;
+    const birth = new Date(dobString);
+    const now = new Date();
+    let age = now.getFullYear() - birth.getFullYear();
+    const m = now.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+    return isNaN(age) || age < 1 ? 28 : age;
+  }
+
+  // Handle ID File Selection
+  function processIdFile(file) {
+    if (!file) return;
+    clearFieldError(null, regIdFileError);
+
+    const isImage = file.type.startsWith('image/');
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      currentRegIdAttachment = {
+        name: file.name,
+        size: formatBytes(file.size),
+        type: file.type,
+        isImage: isImage,
+        dataUrl: dataUrl
+      };
+
+      if (regIdFileName) regIdFileName.textContent = file.name;
+      if (regIdFileSize) regIdFileSize.textContent = formatBytes(file.size);
+
+      if (isImage && regIdPreviewThumb) {
+        regIdPreviewThumb.src = dataUrl;
+        regIdPreviewThumb.style.display = 'block';
+        if (regIdPreviewIcon) regIdPreviewIcon.style.display = 'none';
+      } else {
+        if (regIdPreviewThumb) regIdPreviewThumb.style.display = 'none';
+        if (regIdPreviewIcon) regIdPreviewIcon.style.display = 'flex';
+      }
+
+      if (regIdPreviewCard) regIdPreviewCard.style.display = 'flex';
+      if (regIdDropzone) regIdDropzone.style.display = 'none';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  if (regIdDropzone && regIdFile) {
+    regIdDropzone.addEventListener('click', () => regIdFile.click());
+    regIdDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        regIdFile.click();
+      }
+    });
+
+    regIdDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      regIdDropzone.classList.add('dragover');
+    });
+
+    regIdDropzone.addEventListener('dragleave', () => {
+      regIdDropzone.classList.remove('dragover');
+    });
+
+    regIdDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      regIdDropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processIdFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    regIdFile.addEventListener('change', function () {
+      if (this.files && this.files.length > 0) {
+        processIdFile(this.files[0]);
+      }
+    });
+  }
+
+  if (btnRemoveRegIdFile) {
+    btnRemoveRegIdFile.addEventListener('click', function () {
+      currentRegIdAttachment = null;
+      if (regIdFile) regIdFile.value = '';
+      if (regIdPreviewCard) regIdPreviewCard.style.display = 'none';
+      if (regIdDropzone) regIdDropzone.style.display = 'flex';
+    });
+  }
+
+  // Handle Proof of Residency File Selection (Optional)
+  function processProofFile(file) {
+    if (!file) return;
+    clearFieldError(null, regProofFileError);
+
+    const isImage = file.type.startsWith('image/');
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      currentRegProofAttachment = {
+        name: file.name,
+        size: formatBytes(file.size),
+        type: file.type,
+        isImage: isImage,
+        dataUrl: dataUrl
+      };
+
+      if (regProofFileName) regProofFileName.textContent = file.name;
+      if (regProofFileSize) regProofFileSize.textContent = formatBytes(file.size);
+
+      if (isImage && regProofPreviewThumb) {
+        regProofPreviewThumb.src = dataUrl;
+        regProofPreviewThumb.style.display = 'block';
+        if (regProofPreviewIcon) regProofPreviewIcon.style.display = 'none';
+      } else {
+        if (regProofPreviewThumb) regProofPreviewThumb.style.display = 'none';
+        if (regProofPreviewIcon) regProofPreviewIcon.style.display = 'flex';
+      }
+
+      if (regProofPreviewCard) regProofPreviewCard.style.display = 'flex';
+      if (regProofDropzone) regProofDropzone.style.display = 'none';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  if (regProofDropzone && regProofFile) {
+    regProofDropzone.addEventListener('click', () => regProofFile.click());
+    regProofDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        regProofFile.click();
+      }
+    });
+
+    regProofDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      regProofDropzone.classList.add('dragover');
+    });
+
+    regProofDropzone.addEventListener('dragleave', () => {
+      regProofDropzone.classList.remove('dragover');
+    });
+
+    regProofDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      regProofDropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processProofFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    regProofFile.addEventListener('change', function () {
+      if (this.files && this.files.length > 0) {
+        processProofFile(this.files[0]);
+      }
+    });
+  }
+
+  if (btnRemoveRegProofFile) {
+    btnRemoveRegProofFile.addEventListener('click', function () {
+      currentRegProofAttachment = null;
+      if (regProofFile) regProofFile.value = '';
+      if (regProofPreviewCard) regProofPreviewCard.style.display = 'none';
+      if (regProofDropzone) regProofDropzone.style.display = 'flex';
+    });
+  }
 
   // Immediate inline feedback for confirm password matching
   function validatePasswordConfirmation() {
@@ -556,6 +808,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Clear errors on input for all registration fields
   [
     [regFullName, regFullNameError],
+    [regGender, regGenderError],
+    [regCivilStatus, regCivilStatusError],
     [regMobile, regMobileError],
     [regDob, regDobError],
     [regEmail, regEmailError],
@@ -568,8 +822,29 @@ document.addEventListener('DOMContentLoaded', function () {
       el.addEventListener('input', function () {
         clearFieldError(el, err);
       });
+      el.addEventListener('change', function () {
+        clearFieldError(el, err);
+      });
     }
   });
+
+  // Post-Registration Pending Verification Modal Handlers
+  const regPendingModal = document.getElementById('regPendingModal');
+  const btnClosePendingModal = document.getElementById('btnClosePendingModal');
+  const btnPendingToLogin = document.getElementById('btnPendingToLogin');
+
+  function closePendingModal() {
+    if (regPendingModal) regPendingModal.classList.remove('active');
+  }
+
+  if (btnClosePendingModal) btnClosePendingModal.addEventListener('click', closePendingModal);
+  if (btnPendingToLogin) {
+    btnPendingToLogin.addEventListener('click', function () {
+      closePendingModal();
+      openAuthModal();
+      showLoginView();
+    });
+  }
 
   if (registerForm) {
     registerForm.addEventListener('submit', function (e) {
@@ -579,7 +854,21 @@ document.addEventListener('DOMContentLoaded', function () {
       // Full Name
       const nameVal = regFullName ? regFullName.value.trim() : '';
       if (!nameVal) {
-        setFieldError(regFullName, regFullNameError, 'Full name is required.');
+        setFieldError(regFullName, regFullNameError, 'Full legal name is required.');
+        isValid = false;
+      }
+
+      // Gender (Kasarian)
+      const genderVal = regGender ? regGender.value : '';
+      if (!genderVal) {
+        setFieldError(regGender, regGenderError, 'Please select your gender.');
+        isValid = false;
+      }
+
+      // Civil Status
+      const civilVal = regCivilStatus ? regCivilStatus.value : '';
+      if (!civilVal) {
+        setFieldError(regCivilStatus, regCivilStatusError, 'Please select your civil status.');
         isValid = false;
       }
 
@@ -621,11 +910,25 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Sitio / Purok
-      const sitioVal = regSitio ? regSitio.value.trim() : '';
+      const sitioVal = regSitio ? regSitio.value : '';
       if (!sitioVal) {
         setFieldError(regSitio, regSitioError, 'Sitio / Purok is required.');
         isValid = false;
       }
+
+      // ID Type & Submit ID (picture / attachment)
+      const idTypeVal = regIdType ? regIdType.value : 'Philippine National ID (PhilID)';
+      if (!currentRegIdAttachment) {
+        setFieldError(null, regIdFileError, 'Please submit your government ID photo or scanned attachment.');
+        if (regIdDropzone) {
+          regIdDropzone.style.borderColor = '#ef4444';
+          regIdDropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        isValid = false;
+      }
+
+      // Proof of Residency (Optional)
+      const proofTypeVal = regProofType ? regProofType.value : '';
 
       // Password
       const passVal = regPassword ? regPassword.value : '';
@@ -649,36 +952,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!isValid) return;
 
+      const applicantAge = computeAge(dobVal);
+      const generatedResidentId = 'PW-2026-' + Math.floor(10000 + Math.random() * 90000);
+      const generatedIdNumber = '4829-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+      const generatedProofNumber = proofTypeVal ? ('DOC-PW-' + Math.floor(1000000 + Math.random() * 9000000)) : null;
+
+      // Note: MUST BE VERIFIED FIRST BY ADMIN BEFORE SUCCESSFULLY CREATING AN ACTIVE ACCOUNT
       const newUserData = {
         name: nameVal,
+        fullName: nameVal,
         email: emailVal,
         mobile: mobileVal,
         dob: dobVal,
-        civilStatus: 'Single',
+        age: applicantAge,
+        gender: genderVal,
+        civilStatus: civilVal,
         address: addressVal,
         sitio: sitioVal,
         city: 'Batangas City, Batangas',
-        residentId: 'PW-2026-' + Math.floor(10000 + Math.random() * 90000),
+        residentId: generatedResidentId,
         registeredVoter: 'Yes (Precinct 0142A)',
         verified: false,
+        status: 'Pending',
         verificationTier: 'Pending Administrative Verification',
-        idOnRecord: 'Philippine National ID (PhilID) • Under Verification',
-        avatarInitial: nameVal.charAt(0).toUpperCase()
+        idType: idTypeVal,
+        idNumber: generatedIdNumber,
+        idAttachmentName: currentRegIdAttachment ? currentRegIdAttachment.name : null,
+        idAttachmentData: currentRegIdAttachment ? currentRegIdAttachment.dataUrl : null,
+        idOnRecord: `${idTypeVal} • Pending Admin Verification`,
+        proofType: proofTypeVal || 'Not Provided (Optional)',
+        proofNumber: generatedProofNumber,
+        proofIssuer: proofTypeVal || 'None',
+        proofAttachmentName: currentRegProofAttachment ? currentRegProofAttachment.name : null,
+        proofAttachmentData: currentRegProofAttachment ? currentRegProofAttachment.dataUrl : null,
+        avatarInitial: nameVal.charAt(0).toUpperCase(),
+        password: passVal,
+        submittedAt: new Date().toISOString()
       };
-      localStorage.setItem('brgy360_user', JSON.stringify(newUserData));
 
-      // Also persist into registered residents database
+      // 1. Persist into registered residents database (marked as Pending)
       try {
         const residentsDb = JSON.parse(localStorage.getItem('brgy360_residents_db') || '[]');
-        residentsDb.push({
-          ...newUserData,
-          fullName: nameVal,
-          password: passVal
-        });
-        localStorage.setItem('brgy360_residents_db', JSON.stringify(residentsDb));
-      } catch (err) {}
+        // Remove prior pending with same email if re-submitting
+        const filteredDb = residentsDb.filter(u => !u.email || u.email.toLowerCase() !== emailVal.toLowerCase());
+        filteredDb.push(newUserData);
+        localStorage.setItem('brgy360_residents_db', JSON.stringify(filteredDb));
+      } catch (err) {
+        console.warn('Error saving to residents db:', err);
+      }
 
-      // Also register in admin Resident Verification queue
+      // 2. Queue into admin Resident Verification desk
       try {
         const stored = localStorage.getItem('brgy360_resident_applications');
         let apps = stored ? JSON.parse(stored) : [];
@@ -686,25 +1009,33 @@ document.addEventListener('DOMContentLoaded', function () {
         const today = new Date();
         const dateFormatted = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+        // Remove prior duplicate application if re-submitting
+        apps = apps.filter(a => !a.email || a.email.toLowerCase() !== emailVal.toLowerCase());
+
         apps.unshift({
           id: nextId,
           fullName: nameVal,
           email: emailVal,
           mobile: mobileVal,
-          dob: dobVal || '1996-05-12',
-          age: 30,
-          civilStatus: 'Single',
+          dob: dobVal,
+          age: applicantAge,
+          gender: genderVal,
+          civilStatus: civilVal,
           address: addressVal,
           sitio: sitioVal,
           registeredDate: dateFormatted,
           status: 'Pending',
           voterStatus: 'Registered Voter (Precinct 0142A)',
           channel: 'Resident Portal Self-Registration',
-          idType: 'Philippine National ID (PhilID)',
-          idNumber: '4829-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
-          proofType: 'Meralco Electric Bill',
-          proofNumber: 'MR-' + Math.floor(10000000 + Math.random() * 90000000),
-          proofIssuer: 'Meralco Batangas Sector',
+          idType: idTypeVal,
+          idNumber: generatedIdNumber,
+          idAttachmentName: currentRegIdAttachment ? currentRegIdAttachment.name : null,
+          idAttachmentData: currentRegIdAttachment ? currentRegIdAttachment.dataUrl : null,
+          proofType: proofTypeVal || 'None Provided (Optional)',
+          proofNumber: generatedProofNumber || 'N/A',
+          proofIssuer: proofTypeVal || 'None',
+          proofAttachmentName: currentRegProofAttachment ? currentRegProofAttachment.name : null,
+          proofAttachmentData: currentRegProofAttachment ? currentRegProofAttachment.dataUrl : null,
           rejectionReason: null,
           rejectionNotes: null,
           reviewedAt: null,
@@ -715,23 +1046,44 @@ document.addEventListener('DOMContentLoaded', function () {
         console.warn('Could not update resident applications list:', err);
       }
 
-      if (registerFeedback) {
-        registerFeedback.className = 'auth-feedback-banner success';
-        registerFeedback.textContent = 'Registration submitted! Your account is in a Pending state awaiting admin document verification.';
-        registerFeedback.style.display = 'block';
+      // 3. Populate and show Post-Registration Pending Modal
+      const summaryPendingName = document.getElementById('summaryPendingName');
+      const summaryPendingEmail = document.getElementById('summaryPendingEmail');
+      const summaryPendingGenderCivil = document.getElementById('summaryPendingGenderCivil');
+      const summaryPendingIdType = document.getElementById('summaryPendingIdType');
+      const summaryPendingProofType = document.getElementById('summaryPendingProofType');
+
+      if (summaryPendingName) summaryPendingName.textContent = nameVal;
+      if (summaryPendingEmail) summaryPendingEmail.textContent = emailVal;
+      if (summaryPendingGenderCivil) summaryPendingGenderCivil.textContent = `${genderVal} · ${civilVal}`;
+      if (summaryPendingIdType) {
+        summaryPendingIdType.textContent = `${idTypeVal} ${currentRegIdAttachment ? `(${currentRegIdAttachment.name})` : ''}`;
+      }
+      if (summaryPendingProofType) {
+        summaryPendingProofType.textContent = proofTypeVal
+          ? `${proofTypeVal} ${currentRegProofAttachment ? `(${currentRegProofAttachment.name})` : ''}`
+          : 'None attached (Optional)';
       }
 
-      setTimeout(function () {
-        registerForm.reset();
-        clearAuthFeedback();
-        showLoginView();
-        if (loginEmail) loginEmail.value = emailVal;
-        if (loginFeedback) {
-          loginFeedback.className = 'auth-feedback-banner success';
-          loginFeedback.textContent = 'Registration successful! You may now sign in.';
-          loginFeedback.style.display = 'block';
-        }
-      }, 1400);
+      // Close auth modal and show pending modal
+      closeAuthModal();
+      if (regPendingModal) regPendingModal.classList.add('active');
+
+      // Reset registration form & attachments
+      registerForm.reset();
+      currentRegIdAttachment = null;
+      currentRegProofAttachment = null;
+      if (regIdPreviewCard) regIdPreviewCard.style.display = 'none';
+      if (regIdDropzone) {
+        regIdDropzone.style.display = 'flex';
+        regIdDropzone.style.borderColor = '#cbd5e1';
+      }
+      if (regProofPreviewCard) regProofPreviewCard.style.display = 'none';
+      if (regProofDropzone) regProofDropzone.style.display = 'flex';
+      clearAuthFeedback();
+
+      // Pre-fill login email for quick check
+      if (loginEmail) loginEmail.value = emailVal;
     });
   }
 
